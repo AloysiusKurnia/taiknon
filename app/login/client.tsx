@@ -8,11 +8,16 @@ export default function LoginClient() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<string | null>(null);
+  const [sending, setSending] = useState(false);
   const router = useRouter();
   const justRegistered = useParams().registered === 'true';
+
   const handleLogin: FormEventHandler = async (e) => {
     e.preventDefault();
-
+    if (sending) {
+      return;
+    }
+    setSending(true);
     const response = await signIn('credentials', {
       username, password,
       redirect: false,
@@ -22,6 +27,7 @@ export default function LoginClient() {
       router.push('/dashboard');
     } else {
       setErrors(response?.error ?? 'Unknown error');
+      setSending(false);
     }
   };
   return <main>
@@ -31,7 +37,7 @@ export default function LoginClient() {
       {errors ?? <p>{errors}</p>}
       <label>Username<input type="text" onChange={ev => setUsername(ev.target.value)} /></label>
       <label>Password<input type="password" onChange={ev => setPassword(ev.target.value)} /></label>
-      <button type="submit">Log in</button>
+      <button type="submit" disabled={sending}>Log in</button>
     </form>
   </main >;
 };
