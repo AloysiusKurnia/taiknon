@@ -1,7 +1,7 @@
 'use client';
 
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { FormEventHandler, useState } from "react";
 
 export default function LoginClient() {
@@ -9,6 +9,7 @@ export default function LoginClient() {
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<string | null>(null);
   const router = useRouter();
+  const justRegistered = useParams().registered === 'true';
   const handleLogin: FormEventHandler = async (e) => {
     e.preventDefault();
 
@@ -26,6 +27,7 @@ export default function LoginClient() {
   return <main>
     <form onSubmit={handleLogin}>
       <h1>Login</h1>
+      {justRegistered && <p>Successfully registered. Please log in.</p>}
       {errors ?? <p>{errors}</p>}
       <label>Username<input type="text" onChange={ev => setUsername(ev.target.value)} /></label>
       <label>Password<input type="password" onChange={ev => setPassword(ev.target.value)} /></label>

@@ -1,7 +1,5 @@
-import { signIn } from "next-auth/react";
-import Link from "next/link";
-import SignInButton from "../components/SignInButton";
 import { getServerSession } from "next-auth";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
 export default async function Home() {
@@ -13,7 +11,7 @@ export default async function Home() {
     <h1>Welcome to Taiknon</h1>
     <h2>Your personal scheduling and task manager app!</h2>
 
-    <Link href="/signup">
+    <Link href="/register">
       <button>Create a new account</button>
     </Link>
     <Link href="/login">Or log in if you already have one</Link>

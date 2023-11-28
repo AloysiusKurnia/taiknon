@@ -13,8 +13,8 @@ datasource db {
 model User {
   id           Int           @id @default(autoincrement())
   username     String        @unique @db.VarChar(60)
-  password     String
-  passwordSalt String
+  password     String        @db.Char(44)
+  passwordSalt String        @db.Char(12)
   displayName  String        @db.VarChar(100)
   posts        JournalPost[]
   dailyGoals   DailyGoal[]
@@ -39,7 +39,7 @@ enum CompletionCriteria {
 
 model Completion {
   goal     DailyGoal          @relation(fields: [goalId], references: [id])
-  date     DateTime
+  date     DateTime           @db.Date
   goalId   Int
   criteria CompletionCriteria
 
@@ -49,7 +49,7 @@ model Completion {
 // Journals ===================================================================
 
 model JournalPost {
-  date     DateTime @default(now())
+  date     DateTime @default(now()) @db.Date
   content  String?
   author   User     @relation(fields: [authorId], references: [id])
   authorId Int
