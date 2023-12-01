@@ -4,7 +4,7 @@ import { $Enums } from "@prisma/client";
 import jsonResponse from "@/util/jsonResponse";
 
 export interface DashboardResponse {
-    wroteJournalToday: boolean;
+    todayJournalEntry: string | null;
     markedProgressToday: boolean;
     last7daysCompletions: Record<string, ($Enums.CompletionCriteria | null)[]>;
 }
@@ -19,10 +19,17 @@ export async function GET() {
     const todayStamp = new Date().setUTCHours(0, 0, 0, 0);
 
     const username = session.user.name ?? '';
-    const [lastWritingData, lastCompletions] = await Promise.all([
+    const [lastWritingData, todayJournalEntry, lastCompletions] = await Promise.all([
         prisma.user.findFirst({
             where: { username },
-            select: { lastCompletion: true, lastJournal: true }
+            select: { lastCompletion: true }
+        }),
+        prisma.journalPost.findFirst({
+            where: {
+                author: { username },
+                date: { equals: new Date(todayStamp) }
+            },
+            select: { content: true }
         }),
         prisma.completion.findMany({
             where: {
@@ -40,12 +47,11 @@ export async function GET() {
     if (!lastWritingData) {
         return new Response(null, { status: 404 });
     }
-    const { lastCompletion, lastJournal } = lastWritingData;
-    const wroteJournalToday = lastJournal?.getTime() === todayStamp;
+    const { lastCompletion } = lastWritingData;
     const markedProgressToday = lastCompletion?.getTime() === todayStamp;
     const last7daysCompletions = generateCompletionTable(lastCompletions);
     return jsonResponse<DashboardResponse>({
-        wroteJournalToday,
+        todayJournalEntry: todayJournalEntry?.content ?? null,
         markedProgressToday,
         last7daysCompletions
     });

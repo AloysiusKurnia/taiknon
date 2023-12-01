@@ -22,7 +22,6 @@ model User {
   dailyGoals DailyGoal[]
   ToDo       ToDo[]
 
-  lastJournal    DateTime? @db.Date
   lastCompletion DateTime? @db.Date
 }
 

@@ -18,7 +18,7 @@ export default function DashboardClient({ session }: { session: Session; }) {
       setFetchedData(data);
     }
     fetchData();
-  })
+  });
 
   if (!fetchedData) {
     return <main>
@@ -31,14 +31,37 @@ export default function DashboardClient({ session }: { session: Session; }) {
       <main>
         <h1>Dashboard</h1>
         <p>Welcome {session.user?.name}</p>
-
+        <button onClick={() => signOut({ callbackUrl: "/" })}>Logout</button>
+        
+        <h2>Your journal today</h2>
+        <p>
+          {
+            fetchedData.todayJournalEntry ??
+            "You haven't written anything for today."
+          }
+        </p>
         <button>
           {
-            fetchedData.wroteJournalToday ?
-              "Edit your today's journal" :
+            fetchedData.todayJournalEntry ?
+              "Edit your journal" :
               "Write a journal for today"
           }
         </button>
+        <h2>Daily progress</h2>
+        <table>
+          {
+            Object
+              .entries(fetchedData.last7daysCompletions)
+              .map(([goal, completions]) => <tr key={goal}>
+                <th>
+                  {goal}
+                </th>
+                {completions.map((completion, i) => <td key={`${goal}:${i}`}>
+                  {completion ?? 'Not done'}
+                </td>)}
+              </tr>)
+          }
+        </table>
         <button>
           {
             fetchedData.markedProgressToday ?
@@ -46,13 +69,6 @@ export default function DashboardClient({ session }: { session: Session; }) {
               "Mark your today's daily completion"
           }
         </button>
-        <p>
-          <pre>
-            {JSON.stringify(fetchedData, null, 2)}
-          </pre>
-        </p>
-
-        <button onClick={() => signOut({ callbackUrl: "/" })}>Logout</button>
       </main>
     </SessionProvider>;
   }
