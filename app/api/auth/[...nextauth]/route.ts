@@ -1,4 +1,4 @@
-import hash from "@/util/hash";
+import { hash } from "@/util/cryptoUtil";
 import prisma from "@/util/prisma";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import NextAuth from "next-auth";
