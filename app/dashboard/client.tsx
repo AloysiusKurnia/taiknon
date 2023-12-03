@@ -4,6 +4,7 @@ import { Session } from "next-auth";
 import { SessionProvider, signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { DashboardResponse } from "../api/dashboard/route";
+import CircleDisplay from "@/components/circleChecklists/CircleDisplay";
 
 export default function DashboardClient({ session }: { session: Session; }) {
   const [fetchedData, setFetchedData] = useState<DashboardResponse | null>(null);
@@ -32,7 +33,29 @@ export default function DashboardClient({ session }: { session: Session; }) {
         <h1>Dashboard</h1>
         <p>Welcome {session.user?.name}</p>
         <button onClick={() => signOut({ callbackUrl: "/" })}>Logout</button>
-        
+
+        <h2>Daily progress</h2>
+        <table>
+          {
+            Object
+              .entries(fetchedData.last7daysCompletions)
+              .map(([goal, completions]) => <tr key={goal}>
+                <th>
+                  {goal}
+                </th>
+                {completions.map((completion, i) => <td key={`${goal}:${i}`}>
+                  <CircleDisplay status={completion} />
+                </td>)}
+              </tr>)
+          }
+        </table>
+        <button>
+          {
+            fetchedData.markedProgressToday ?
+              "Edit your today's daily completion" :
+              "Mark your today's daily completion"
+          }
+        </button>
         <h2>Your journal today</h2>
         <p>
           {
@@ -47,28 +70,7 @@ export default function DashboardClient({ session }: { session: Session; }) {
               "Write a journal for today"
           }
         </button>
-        <h2>Daily progress</h2>
-        <table>
-          {
-            Object
-              .entries(fetchedData.last7daysCompletions)
-              .map(([goal, completions]) => <tr key={goal}>
-                <th>
-                  {goal}
-                </th>
-                {completions.map((completion, i) => <td key={`${goal}:${i}`}>
-                  {completion ?? 'Not done'}
-                </td>)}
-              </tr>)
-          }
-        </table>
-        <button>
-          {
-            fetchedData.markedProgressToday ?
-              "Edit your today's daily completion" :
-              "Mark your today's daily completion"
-          }
-        </button>
+
       </main>
     </SessionProvider>;
   }
