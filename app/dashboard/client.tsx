@@ -13,7 +13,14 @@ export default function DashboardClient({ session }: { session: Session; }) {
       return;
     }
     async function fetchData() {
-      const response = await fetch('/api/dashboard');
+      const response = await fetch('/api/dashboard', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          utcOffset: new Date().getTimezoneOffset()
+        }),
+      });
+
       const data = await response.json();
       setFetchedData(data);
     }

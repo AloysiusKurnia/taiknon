@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth";
 import prisma from "@/util/prisma";
 import { $Enums } from "@prisma/client";
 import jsonResponse from "@/util/jsonResponse";
+import { z } from "zod";
 
 export interface DashboardResponse {
     todayJournalEntry: string | null;
@@ -11,11 +12,30 @@ export interface DashboardResponse {
 
 const DAYS = 24 * 60 * 60 * 1000;
 
-export async function GET() {
+const DashboardRequest = z.object({
+    utcOffset: z.number()
+});
+
+export async function POST(req: Request) {
     const session = await getServerSession();
     if (!session || !session.user) {
-        return new Response(null, { status: 401 });
+        return new Response(null, {
+            status: 401 // unauthorized
+        });
     }
+
+    let utcOffset: number;
+    try {
+        const { utcOffset } = DashboardRequest.parse(await req.json());
+        // TODO: check utcOffset and remove next log
+        // In jakarta this should be -420 minutes (UTC-07:00)
+        console.log(utcOffset);
+    } catch (e) {
+        return new Response(null, {
+            status: 400 // bad request
+        });
+    }
+
     const todayStamp = new Date().setUTCHours(0, 0, 0, 0);
 
     const username = session.user.name ?? '';
@@ -47,7 +67,9 @@ export async function GET() {
     ]);
 
     if (!lastCompletionData) {
-        return new Response(null, { status: 404 });
+        return new Response(null, {
+            status: 404 // not found
+        });
     }
     const { lastCompletion } = lastCompletionData;
     const markedProgressToday = lastCompletion?.getTime() === todayStamp;
