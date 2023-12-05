@@ -19,11 +19,12 @@ export async function GET() {
     const todayStamp = new Date().setUTCHours(0, 0, 0, 0);
 
     const username = session.user.name ?? '';
-    const [lastWritingData, todayJournalEntry, lastCompletions] = await Promise.all([
+    const [lastCompletionData, todayJournalEntry, completions] = await Promise.all([
         prisma.user.findFirst({
             where: { username },
             select: { lastCompletion: true }
         }),
+
         prisma.journalPost.findFirst({
             where: {
                 author: { username },
@@ -31,6 +32,7 @@ export async function GET() {
             },
             select: { content: true }
         }),
+
         prisma.completion.findMany({
             where: {
                 date: { gte: new Date(todayStamp - DAYS * 7) },
@@ -44,12 +46,12 @@ export async function GET() {
         })
     ]);
 
-    if (!lastWritingData) {
+    if (!lastCompletionData) {
         return new Response(null, { status: 404 });
     }
-    const { lastCompletion } = lastWritingData;
+    const { lastCompletion } = lastCompletionData;
     const markedProgressToday = lastCompletion?.getTime() === todayStamp;
-    const last7daysCompletions = generateCompletionTable(lastCompletions);
+    const last7daysCompletions = generateCompletionTable(completions);
     return jsonResponse<DashboardResponse>({
         todayJournalEntry: todayJournalEntry?.content ?? null,
         markedProgressToday,

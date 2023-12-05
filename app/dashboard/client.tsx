@@ -32,7 +32,7 @@ export default function DashboardClient({ session }: { session: Session; }) {
         <h1>Dashboard</h1>
         <p>Welcome {session.user?.name}</p>
         <button onClick={() => signOut({ callbackUrl: "/" })}>Logout</button>
-        
+
         <h2>Your journal today</h2>
         <p>
           {
